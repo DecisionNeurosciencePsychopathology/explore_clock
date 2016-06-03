@@ -131,7 +131,7 @@ fprintf('Logging into Thorndike now....\n')
 %How many runs
 for run = 1:b.total_blocks
     %set command string
-    cmd_str = sprintf('"c:/kod/CogEmoFaceReward/aux_scripts/expectTest.exp %s %s"', num2str(b.id),num2str(run));
+    cmd_str = sprintf('"c:/kod/explore_clock/aux_scripts/expectTest.exp %s %s"', num2str(b.id),num2str(run));
     %set cygwin path string
     cygwin_path_sting = 'E:\cygwin\bin\bash --login -c ';
     %Run it kick out if failed

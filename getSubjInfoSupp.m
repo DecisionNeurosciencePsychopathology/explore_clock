@@ -43,7 +43,7 @@ end
 %rev-Reversal norm - Normal 2x2 design
 %subject.task_ver = NaN;
 subject.task_ver = 'rev';
-reversal_flag = [];
+reversal_flag = 0;
 % % % while (strcmpi(subject.task_ver ,'rev')==0 && strcmp(subject.task_ver ,'norm')==0)
 % % %
 % % %     subject.task_ver  = input('Which task version, Reversal or Normal 2x2 (rev or norm): ','s');
@@ -65,19 +65,19 @@ reversal_flag = [];
 % % %
 % % % end
 %Which Reversal
-if strcmpi(subject.task_ver, 'rev')
-    reversal_flag = NaN;
-    while isnan(reversal_flag) || abs(reversal_flag)>=2
-        idInput = str2double(input('Which reversal 0-Fixed 1-Adaptive: ','s'));
-        if ~isnan(idInput)   %Force to be category
-            reversal_flag = idInput;
-            subject.reversal_flag = reversal_flag;
-        else
-            fprintf('\n Come on it''s either a 0 or a 1!.... \n\n');
-            fprintf('\n  0-Fixed 1-Adaptive \n\n');
-        end
-    end
-end
+% if strcmpi(subject.task_ver, 'rev')
+%     reversal_flag = NaN;
+%     while isnan(reversal_flag) || abs(reversal_flag)>=2
+%         idInput = str2double(input('Which reversal 0-Fixed 1-Adaptive: ','s'));
+%         if ~isnan(idInput)   %Force to be category
+%             reversal_flag = idInput;
+%             subject.reversal_flag = reversal_flag;
+%         else
+%             fprintf('\n Come on it''s either a 0 or a 1!.... \n\n');
+%             fprintf('\n  0-Fixed 1-Adaptive \n\n');
+%         end
+%     end
+% end
 
 
 
@@ -310,7 +310,7 @@ if ~ismember('run_num', fields(subject)), subject.run_num = 1; end %if new parti
 %% fill out the subject struct if any part of it is still empty
 
 if ~ismember('age', fields(subject)) || isnan(subject.age)
-    subject.age = NaN;
+    subject.age = 99;
     while isnan(subject.age)
         ageInput = str2double(input('Enter the subject''s age: ','s')); %force to be numeric
         if ~isnan(ageInput)
@@ -324,7 +324,7 @@ else
 end
 
 if ~ismember('gender', fields(subject))
-    subject.gender=[];
+    subject.gender='NA';
     while isempty(subject.gender)
         subject.gender = input(['Enter subject''s gender (m or f): '], 's');
         if ~(strcmpi(subject.gender, 'm') || strcmpi(subject.gender, 'f'))
