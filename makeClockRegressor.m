@@ -1,26 +1,31 @@
-function makeClockRegressor(id)
+function makeClockRegressor(id,out)
 
+if nargin < 2, out = 0; end
+
+if ~isstr(id)
+    id = num2str(id);
+end
 
 %If subject is not processed yet
-foldername = ['subjects/processed/id' num2str(id)];
+foldername = ['subjects/processed/id' id];
 if ~exist(foldername, 'dir')
     fprintf('\nSubject not processed making folder...\n')
     mkdir(foldername);
     %Convert the .mat file to a .csv
-    ClockToCSV(sprintf('subjects/fMRIEmoClockSupplement_%d_1_tc.mat',id))
-    movefile(sprintf('subjects/fMRIEmoClockSupplement_%d_1_tc_tcExport.csv',id), sprintf('subjects/processed/id%s/fMRIEmoClockSupplement_%d_1_tc_tcExport.csv',num2str(id),id)); 
+    ClockToCSV(sprintf('subjects/fMRIEmoClockSupplement_%s_1_tc.mat',id))
+    movefile(sprintf('subjects/fMRIEmoClockSupplement_%s_1_tc_tcExport.csv',id), sprintf('subjects/processed/id%s/fMRIEmoClockSupplement_%s_1_tc_tcExport.csv',id,id)); 
 end
 
 %Convert the .mat file to a .csv
 %ClockToCSV(sprintf('subjects/fMRIEmoClockSupplement_%d_1_tc.mat',id))
 
 %Grab the newfile name based off id
-T = readtable(sprintf('subjects/processed/id%s/fMRIEmoClockSupplement_%d_1_tc_tcExport.csv',num2str(id),id));
+T = readtable(sprintf('subjects/processed/id%s/fMRIEmoClockSupplement_%s_1_tc_tcExport.csv',id,id));
 
 fprintf('\nCreating subject specific regressor files\n\n');
 
 %Local data storage
-data_dump_str = strcat('E:\data\explore_clock\regs\', num2str(id));
+data_dump_str = strcat('E:\data\explore_clock\regs\', id);
 b.id = id; %set id
 b.regs = [];
 n_t = length(T.trial); %Number of trials
@@ -40,6 +45,11 @@ b.itionset = T.iti_onset;
 
 %Create volume-wise censor regressor
 b=createClockCensorRegressor(b);
+
+%Return vba_regressors data
+if isstruct(out)
+    b=makeVBARegressors(b,out);
+end
 
 %% Pre-allocate memory for regressor time structures
 decision.event_beg=zeros(b.trials_per_block,b.total_blocks);
@@ -97,6 +107,11 @@ trial.event_end=reshape(feedback.event_end,[n_t,1]);
 dec_stick = .01; %100 ms
 [b.stim_times.resp_fsl,b.stim_times.resp_spmg]=write3Ddeconv_startTimes(data_dump_str,decision.event_beg,decision.event_end,'decision_Times',b.choice_and_feedback_censor,0,b);
 [b.stim_times.resp_fsl,b.stim_times.resp_spmg]=write3Ddeconv_startTimes(data_dump_str,decision.event_beg,decision.event_beg + dec_stick,'decision_TimesWithStick',b.choice_and_feedback_censor,0,b);
+
+%Value
+[b.stim_times.resp_fsl,b.stim_times.resp_spmg]=write3Ddeconv_startTimes(data_dump_str,decision.event_beg,decision.event_end,'valueDecisionAligned',b.out.vmax',0,b);
+[b.stim_times.resp_fsl,b.stim_times.resp_spmg]=write3Ddeconv_startTimes(data_dump_str,decision.event_beg,decision.event_end,'valueChosen',b.out.v_chosen,0,b);
+[b.stim_times.resp_fsl,b.stim_times.resp_spmg]=write3Ddeconv_startTimes(data_dump_str,decision.event_beg,decision.event_end,'valueChosenStandardized',b.out.v_chosen_standardized,0,b);
 
 %% Feedback aligned Regressors
 [b.stim_times.feedback_fsl,b.stim_times.feedback_spmg]=write3Ddeconv_startTimes(data_dump_str,feedback.event_beg,feedback.event_end,'feedback_Times',b.choice_and_feedback_censor,0,b);
