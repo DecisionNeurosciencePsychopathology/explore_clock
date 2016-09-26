@@ -28,7 +28,7 @@ if nargin < 6, plot_rbf=0; end
 
 %Initialize time step vector and allocate for memory
 tvec=1:ntimesteps;
-sig_spread=prop_spread*range(tvec); %determine SD of spread function
+sig_spread=prop_spread*(max(tvec) - min(tvec)); %determine SD of spread function
 
 margin_offset = (max(tvec) - min(tvec)).*margin_offset; % convert margin_offset into time scale of tvec
 
@@ -67,6 +67,6 @@ end
 %Use this to rescale elibility function to maintain constant AUC equivalent to a standard Gaussian membership function.
 %This leads to eligibility 0-1.0 for eligibility functions within the interval, and > 1.0 max for truncated functions.
 %In testing (weightfit.m), this gives the best sampling behavior
-refspread = sum(gaussmf(min(tvec)-range(tvec):max(tvec)+range(tvec), [sig_spread, median(tvec)]));
+refspread = sum(gaussmf(min(tvec)-(max(tvec) - min(tvec)):max(tvec)+(max(tvec) - min(tvec)), [sig_spread, median(tvec)]));
 
 end

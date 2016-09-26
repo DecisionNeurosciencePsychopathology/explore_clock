@@ -6,26 +6,42 @@ if ~isstr(id)
     id = num2str(id);
 end
 
+
+        %create generic path name
+        gpath=sprintf('subjects/%s/fMRI*.mat',id);
+        fpath=glob(gpath);
+
+        gpath2=sprintf('subjects/%s/fMRI*_%s_1_tc_tcExport.csv',id,id);
+        fpath2=glob(gpath2);
+
 %If subject is not processed yet
-foldername = ['subjects/processed/id' id];
+foldername = ['subjects/' id];
 if ~exist(foldername, 'dir')
     fprintf('\nSubject not processed making folder...\n')
-    mkdir(foldername);
     %Convert the .mat file to a .csv
-    ClockToCSV(sprintf('subjects/fMRIEmoClockSupplement_%s_1_tc.mat',id))
-    movefile(sprintf('subjects/fMRIEmoClockSupplement_%s_1_tc_tcExport.csv',id), sprintf('subjects/processed/id%s/fMRIEmoClockSupplement_%s_1_tc_tcExport.csv',id,id)); 
+    ClockToCSV(fpath)
+    mkdir(foldername);
+    %movefile(sprintf('subjects/%s/fMRIEmoClockSupplement_%s_1_tc_tcExport.csv',id,id), sprintf('subjects/processed/id%s/fMRIEmoClockSupplement_%s_1_tc_tcExport.csv',id,id)); 
 end
 
 %Convert the .mat file to a .csv
 %ClockToCSV(sprintf('subjects/fMRIEmoClockSupplement_%d_1_tc.mat',id))
 
 %Grab the newfile name based off id
-T = readtable(sprintf('subjects/processed/id%s/fMRIEmoClockSupplement_%s_1_tc_tcExport.csv',id,id));
+file_path2 = char(fpath2);
+T = readtable(file_path2);
 
 fprintf('\nCreating subject specific regressor files\n\n');
 
 %Local data storage
-data_dump_str = strcat('E:\data\explore_clock\regs\', id);
+data_dump_str=sprintf('regs\\%s\\%s',id,id);
+sub_folder=sprintf('regs\\%s',id);
+ 
+if ~exist(sub_folder,'file')
+    mkdir(sub_folder)
+    fprintf('Creating id specific reg folder in: %s\n\n',sub_folder);
+end
+
 b.id = id; %set id
 b.regs = [];
 n_t = length(T.trial); %Number of trials

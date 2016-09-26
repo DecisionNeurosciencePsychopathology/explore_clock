@@ -1,9 +1,8 @@
 %Wrapper for processing all explore clock subjects with out SCEPTIC model
 
-cleanWorkspace
 
 %Set up main data directory
-data_dirs = glob('c:\kod\explore_clock\subjects\processed\*');
+data_dirs = glob('subjects\*');
 
 %Set up variables
 nbasis = 16;
@@ -23,15 +22,40 @@ graphics = 0; %If we want to plot or not
 modelnames = {'fixed_decay'};
 
 
+
+
+
 for m=1:length(modelnames)
     model = char(modelnames(m));
     for i = 1:length(data_dirs)
         subj_dir = data_dirs{i};
+
+        id = str2double(subj_dir(isstrprop(subj_dir,'digit')));
+        
+        %create generic path name
+        gpath=sprintf('subjects/%d/fMRI*.mat',id);
+        fpath=glob(gpath);
+
+        gpath2=sprintf('subjects/%d/fMRI*_%d_1_tc_tcExport.csv',id,id);
+        fpath2=glob(gpath2);
+        
+        %If subject is not processed yet
+        foldername = ['subjects/' mat2str(id)];
+        %make fpath2 a string
+        file_path = char(fpath2);
+        if ~exist(file_path, 'file')
+            fprintf('\nSubject not processed...\n')
+            %Convert the .mat file to a .csv
+            ClockToCSV(fpath)
+        end
+        
         subj_file = glob([subj_dir '\*.csv']);
         subj_file = subj_file{:};
-        id = str2double(subj_dir(isstrprop(subj_dir,'digit')));
         [posterior,out] = explore_clock_sceptic_vba(subj_file,id,model,nbasis, multinomial, multisession, fixed_params_across_runs, fit_propspread,n_steps,u_aversion,saveresults,graphics);
         L(m,i) = out.F;
         makeClockRegressor(id,out)
     end
 end
+
+
+

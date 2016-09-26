@@ -1,4 +1,4 @@
-function ClockToCSV(filename, fieldnames)
+function ClockToCSV(filen, fieldnames)
     %helper function
     function st = cell2str(cellStr)
         if isempty(cellStr)
@@ -12,6 +12,7 @@ function ClockToCSV(filename, fieldnames)
     end
 
 %verify file existence
+filename=char(filen);
 if ~exist(filename,'file'), error('cannot find file: %s\n', filename); end
 
 %load behavioral results into local structure

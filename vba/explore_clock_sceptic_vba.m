@@ -24,6 +24,7 @@ if nargin < 11, graphics = 0; end
 global rew_rng_state no_gamma
 rew_rng_seed = 99;
 
+options.inG.autocorrelation='none';
 
 if ~graphics
     options.DisplayWin = 0;
@@ -42,7 +43,7 @@ n_phi = 1;
 % If we can't find the path have the user select it.
 os = computer;
 if strcmp(os(1:end-2),'PCWIN')
-    results_dir = 'E:\data\sceptic\explore_clock\';
+    results_dir = 'E:\data\sceptic\explore_clock\'; %CHANGE for bpd clock to more generic path
 else
     [~, me] = system('whoami');
     me = strtrim(me);
