@@ -1,0 +1,19 @@
+#!/usr/bin/expect -f
+
+#For the love of God don't push this to the repo!
+#arg1=id
+#arg2=block number
+set timeout 120
+set arg1 [lindex $argv 0]
+set arg2 [lindex $argv 1]
+spawn ssh -o StrictHostKeyChecking=no emilytrea@10.128.149.25
+expect "*?assword:*"
+send -- "0804706et\r"
+sleep 2
+#send -- "ls /Volumes/bek/explore/MR_Proc/$arg1/clock\r"
+send -- "less /Volumes/bek/explore/MR_Proc/$arg1/clockRev_proc/clockrev$arg2/motion_info/censor_union.1D | wc -l\r"
+sleep 3
+send -- "exit\r"
+expect eof
+
+

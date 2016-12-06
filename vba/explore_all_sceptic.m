@@ -1,6 +1,9 @@
 %Wrapper for processing all explore clock subjects with out SCEPTIC model
 
 
+jj=1;
+hh=1;
+
 %Set up main data directory
 data_dirs = glob('subjects\*');
 
@@ -53,8 +56,124 @@ for m=1:length(modelnames)
         subj_file = subj_file{:};
         [posterior,out] = explore_clock_sceptic_vba(subj_file,id,model,nbasis, multinomial, multisession, fixed_params_across_runs, fit_propspread,n_steps,u_aversion,saveresults,graphics);
         L(m,i) = out.F;
+        
+  try
         makeClockRegressor(id,out)
+            cdir= cd;
+            if strcmp(cdir,'C:\Users\emtre\OneDrive\Documents\GitHub\bpd_clock')
+                currfolder='bpd_clock';
+                newfolder='/Volumes/bek/bsocial/bpd_clock/regs'; %folder to be place in within thorndike
+                task={'bpdclock_rev'};
+                pl=1;
+            else
+                currfolder='explore_clock';
+                newfolder='/Volumes/bek/explore/clock_rev/regs'; %folder to be place in within thorndike
+                task={'clock_rev'};
+                pl=2;
+            end
+            
+        %move the regressor files to thorndike    
+        moveregs(currfolder,num2str(id),newfolder);
+        
+        
+    %write the ids that successfully ran into a cell
+    ID(jj,1)=id;
+  
+    
+    
+    Task{jj,1}=task; 
+    
+    if pl==2
+        trialdone=fopen('idlog_clock.txt');
+    else
+        trialdone=fopen('idlog_bpdclock.txt');
     end
+        
+    trialdone=fscanf(trialdone,'%d');
+    
+    trialdone1=0;
+    for aa=1:length(trialdone)
+        if trialdone(aa,1) == id
+            trialdone1=1;
+        end
+    end
+    
+    if trialdone1 == 1
+        td={'yes'};
+    else
+        td={'no'};
+    end
+    fMRI_Preprocess_Complete{jj,1}=td; 
+      jj=jj+1;
+    
+    %turn completed cell into table
+    t=table(ID,Task,fMRI_Preprocess_Complete);
+    
+    if pl==2
+        ct=t;
+        save('completed','ct');
+    else
+        bct=t;
+        save('completed','bct');
+    end
+        
+   catch
+              disp(sprintf('\nUnable to run ID %d: does not have correct folder or file in Thorndike...\n',id))
+        
+        %put IDs that didn't run into table
+        ID2(hh,1)=id; 
+        
+        cdir= cd;
+            if strcmp(cdir,'C:\Users\emtre\OneDrive\Documents\GitHub\bpd_clock')
+                currfolder='bpd_clock';
+                newfolder='/Volumes/bek/bsocial/bpd_clock/regs'; %folder to be place in within thorndike
+                task={'bpdclock_rev'};
+                pl=1;
+            else
+                currfolder='explore_clock';
+                newfolder='/Volumes/bek/explore/clock_rev/regs'; %folder to be place in within thorndike
+                task={'clock_rev'};
+                pl=2;
+            end
+            
+    
+        Task2{hh,1}=task; 
+        
+        hh=hh+1;
+        
+        t2=table(ID2,Task2);
+       
+       if pl==2
+        ct2=t2;
+        save('unable_to_run','ct2');
+       else
+        bct2=t2;
+        save('unable_to_run','bct2');
+       end
+        
+   end
+    end
+    
+    if pl==2
+        
+        if exist('ct2')==0
+            ID2=0;
+            Task2={'clock_rev'};
+            ct2=table(ID2,Task2);
+            save('unable_to_run','ct2')
+        end
+
+    else
+        
+        if exist('bct2')==0
+            ID2=0;
+            Task2={'bpd_clock'};
+            bct2=table(ID2,Task2);
+            save('unable_to_run','bct2')
+        end
+        
+    end
+    
 end
 
 
