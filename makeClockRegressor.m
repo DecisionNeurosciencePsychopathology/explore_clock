@@ -19,13 +19,12 @@ foldername = ['subjects/' id];
 if ~exist(foldername, 'dir')
     fprintf('\nSubject not processed making folder...\n')
     %Convert the .mat file to a .csv
-    ClockToCSV(fpath)
     mkdir(foldername);
     %movefile(sprintf('subjects/%s/fMRIEmoClockSupplement_%s_1_tc_tcExport.csv',id,id), sprintf('subjects/processed/id%s/fMRIEmoClockSupplement_%s_1_tc_tcExport.csv',id,id)); 
 end
 
 %Convert the .mat file to a .csv
-%ClockToCSV(sprintf('subjects/fMRIEmoClockSupplement_%d_1_tc.mat',id))
+ClockToCSV(fpath)
 
 %Grab the newfile name based off id
 file_path2 = char(fpath2);
@@ -123,6 +122,9 @@ trial.event_end=reshape(feedback.event_end,[n_t,1]);
 dec_stick = .01; %100 ms
 [b.stim_times.resp_fsl,b.stim_times.resp_spmg]=write3Ddeconv_startTimes(data_dump_str,decision.event_beg,decision.event_end,'decision_Times',b.choice_and_feedback_censor,0,b);
 [b.stim_times.resp_fsl,b.stim_times.resp_spmg]=write3Ddeconv_startTimes(data_dump_str,decision.event_beg,decision.event_beg + dec_stick,'decision_TimesWithStick',b.choice_and_feedback_censor,0,b);
+
+%Motor -- same as decision_Times
+[b.stim_times.resp_fsl,b.stim_times.resp_spmg]=write3Ddeconv_startTimes(data_dump_str,decision.event_beg,decision.event_end,'right',b.choice_and_feedback_censor,0,b);
 
 %Value
 [b.stim_times.resp_fsl,b.stim_times.resp_spmg]=write3Ddeconv_startTimes(data_dump_str,decision.event_beg,decision.event_end,'valueDecisionAligned',b.out.vmax',0,b);
