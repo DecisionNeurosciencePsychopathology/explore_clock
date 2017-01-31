@@ -4,6 +4,9 @@
 jj=1;
 hh=1;
 
+
+
+
 %Set up main data directory
 data_dirs = glob('subjects\*');
 
@@ -29,8 +32,10 @@ modelnames = {'fixed_decay'};
 
 
 for m=1:length(modelnames)
+   
     model = char(modelnames(m));
     for i = 1:length(data_dirs)
+        try
         subj_dir = data_dirs{i};
 
         id = str2double(subj_dir(isstrprop(subj_dir,'digit')));
@@ -57,7 +62,7 @@ for m=1:length(modelnames)
         [posterior,out] = explore_clock_sceptic_vba(subj_file,id,model,nbasis, multinomial, multisession, fixed_params_across_runs, fit_propspread,n_steps,u_aversion,saveresults,graphics);
         L(m,i) = out.F;
         
-  try
+%   try
         makeClockRegressor(id,out)
             cdir= cd;
             if strcmp(cdir,'C:\Users\emtre\OneDrive\Documents\GitHub\bpd_clock')
@@ -117,9 +122,8 @@ for m=1:length(modelnames)
         save('completed','bct');
     end
         
-   catch
-              disp(sprintf('\nUnable to run ID %d: does not have correct folder or file in Thorndike...\n',id))
-        
+        catch exception
+                     
         %put IDs that didn't run into table
         ID2(hh,1)=id; 
         
@@ -129,11 +133,13 @@ for m=1:length(modelnames)
                 newfolder='/Volumes/bek/bsocial/bpd_clock/regs'; %folder to be place in within thorndike
                 task={'bpdclock_rev'};
                 pl=1;
+                errorlog('bpdclockrev',id,exception)
             else
                 currfolder='explore_clock';
                 newfolder='/Volumes/bek/explore/clock_rev/regs'; %folder to be place in within thorndike
                 task={'clock_rev'};
                 pl=2;
+                errorlog('clockrev',id,exception)
             end
             
     
@@ -150,8 +156,9 @@ for m=1:length(modelnames)
         bct2=t2;
         save('unable_to_run','bct2');
        end
-        
+%         
    end
+
     end
     
     if pl==2
@@ -173,8 +180,10 @@ for m=1:length(modelnames)
         end
         
     end
-    
-end
+
+
+
+end 
 
 
 
