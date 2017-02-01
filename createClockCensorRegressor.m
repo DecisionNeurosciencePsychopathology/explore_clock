@@ -11,6 +11,7 @@ scan_tr = .6;
 
 %If we didn't already grab the subjects volume run length do it now
 file_str = sprintf('subjects/%s/%s_block_lengh.mat',num2str(b.id),num2str(b.id));
+
 if ~exist(file_str,'file')
     b=findBlockLength(b);
     block_length = b.block_length; %This is subject specific create that function to grab this from 3dinfo
@@ -132,25 +133,38 @@ function b=findBlockLength(b)
 
 fprintf('Logging into Thorndike now....\n')
 
-% %can't access Thorndike, manually input block lengths
-% load('block_length.mat')
-% b.block_length=block_length;
-
 %How many runs
 for run = 1:b.total_blocks
+    
     %set command string
     %cmd_str = sprintf('"C:/Users/emtre/OneDrive/Documents/GitHub/explore_clock/expectTest.exp %s %s"', num2str(b.id),num2str(run));
-    cmd_str = sprintf('"c:/kod/explore_clock/aux_scripts/expectTest.exp %s %s"', num2str(b.id),num2str(run));
+    %JW: Let's make sure the expect scripts are in a dir called aux scripts
+    %from now on
+    cmd_str = sprintf('"aux_scripts/expectTest.exp %s %s"', num2str(b.id),num2str(run));
+    
+    
+    %set command string based on which directory you are currently in (explore_clock or bpd_clock)
+    %     cdir= cd;
+    %     if strcmp(cdir,'C:\Users\emtre\OneDrive\Documents\GitHub\bpd_clock')
+    %         cmd_str = sprintf('"C:/Users/emtre/OneDrive/Documents/GitHub/bpd_clock/expectTest.exp %s %s"', num2str(b.id),num2str(run));
+    %     else
+    %          cmd_str = sprintf('"C:/Users/emtre/OneDrive/Documents/GitHub/explore_clock/expectTest.exp %s %s"', num2str(b.id),num2str(run));
+    %     end
+    %cmd_str = sprintf('"c:/kod/explore_clock/aux_scripts/expectTest.exp %s %s"', num2str(b.id),num2str(run));
+    
     %set cygwin path string
     cygwin_path_sting = 'E:\cygwin\bin\bash --login -c ';
+    
     %Run it kick out if failed
     fprintf('Grabbing volumes....\n')
     [status,cmd_out]=system([cygwin_path_sting cmd_str]);
     if status==1
         error('Connection to Thorndike failed :(')
     end
+    
     %Grab the volume number
     reg_out = regexp(cmd_out,'(?<=wc -l\s+)[0-9]{3,4}','match');
+    
     %Make reg out a number
     b.block_length(run)=str2double(reg_out{1});
 end
