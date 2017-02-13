@@ -1,40 +1,21 @@
-function makeClockRegressor(id,out)
+function [out,task_data]=makeClockRegressor(id,fpath,out,task_data)
 
-if nargin < 2, out = 0; end
+if nargin < 3, out = 0; end
+if nargin < 4, out = 0; task_data=struct([]); end
 
 if ~isstr(id)
     id = num2str(id);
 end
 
-
-        %create generic path name
-        gpath=sprintf('subjects/%s/fMRI*.mat',id);
-        fpath=glob(gpath);
-
-        gpath2=sprintf('subjects/%s/fMRI*_%s_1_tc_tcExport.csv',id,id);
-        fpath2=glob(gpath2);
-
-%If subject is not processed yet
-foldername = ['subjects/' id];
-if ~exist(foldername, 'dir')
-    fprintf('\nSubject not processed making folder...\n')
-    %Convert the .mat file to a .csv
-    mkdir(foldername);
-    %movefile(sprintf('subjects/%s/fMRIEmoClockSupplement_%s_1_tc_tcExport.csv',id,id), sprintf('subjects/processed/id%s/fMRIEmoClockSupplement_%s_1_tc_tcExport.csv',id,id)); 
-end
-
-%Convert the .mat file to a .csv
-ClockToCSV(fpath)
-
 %Grab the newfile name based off id
-file_path2 = char(fpath2);
-T = readtable(file_path2);
+fpath = char(fpath);
+T = readtable(fpath);
 
 fprintf('\nCreating subject specific regressor files\n\n');
 
 %Local data storage
-data_dump_str=sprintf('regs\\%s\\%s',id,id);
-sub_folder=sprintf('regs\\%s',id);
+data_dump_str=sprintf('regs/%s/%s',id,id);
+sub_folder=sprintf('regs/%s',id);
  
 if ~exist(sub_folder,'file')
     mkdir(sub_folder)
@@ -60,6 +41,10 @@ b.itionset = T.iti_onset;
 
 %Create volume-wise censor regressor
 b=createClockCensorRegressor(b);
+
+%Update task tracking data -- this should be true however the imaging
+%pipeline likes to break down without finishing sometimes!
+task_data.fMRI_processed=1;
 
 %Return vba_regressors data
 if isstruct(out)

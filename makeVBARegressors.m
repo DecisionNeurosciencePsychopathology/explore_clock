@@ -1,6 +1,12 @@
 function b=makeVBARegressors(b,out)
+%Depending upon the options if we tracked PE or not you will need to select
+%the correct index of the out.suffStat.muX array.
 
-mu_ij = out.suffStat.muX';
+if out.options.inF.track_pe==1
+    mu_ij = out.suffStat.muX(out.options.inF.nbasis+1:out.options.inF.nbasis*2,:)';
+else
+    mu_ij = out.suffStat.muX';
+end
 gaussmat = out.options.inG.gaussmat;
 ntimesteps = out.options.inF.ntimesteps;
 trials = length(b.stim_OnsetTime);

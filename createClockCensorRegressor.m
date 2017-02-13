@@ -136,22 +136,13 @@ fprintf('Logging into Thorndike now....\n')
 %How many runs
 for run = 1:b.total_blocks
     
-    %set command string
-    %cmd_str = sprintf('"C:/Users/emtre/OneDrive/Documents/GitHub/explore_clock/expectTest.exp %s %s"', num2str(b.id),num2str(run));
-    %JW: Let's make sure the expect scripts are in a dir called aux scripts
-    %from now on
-    cmd_str = sprintf('"aux_scripts/expectTest.exp %s %s"', num2str(b.id),num2str(run));
-    
-    
-    %set command string based on which directory you are currently in (explore_clock or bpd_clock)
-    %     cdir= cd;
-    %     if strcmp(cdir,'C:\Users\emtre\OneDrive\Documents\GitHub\bpd_clock')
-    %         cmd_str = sprintf('"C:/Users/emtre/OneDrive/Documents/GitHub/bpd_clock/expectTest.exp %s %s"', num2str(b.id),num2str(run));
-    %     else
-    %          cmd_str = sprintf('"C:/Users/emtre/OneDrive/Documents/GitHub/explore_clock/expectTest.exp %s %s"', num2str(b.id),num2str(run));
-    %     end
-    %cmd_str = sprintf('"c:/kod/explore_clock/aux_scripts/expectTest.exp %s %s"', num2str(b.id),num2str(run));
-    
+    %set command string    
+    %Note dir names may change, but seems like the simplest solution
+    exp_file_path = what('aux_scripts');
+    script_name = ls([exp_file_path.path '/*exp']);
+    exp_file_path = strrep([exp_file_path.path '/' script_name],'\','/');
+    cmd_str = sprintf('"%s %s %s"',exp_file_path, num2str(b.id),num2str(run));
+        
     %set cygwin path string
     cygwin_path_sting = 'E:\cygwin\bin\bash --login -c ';
     
