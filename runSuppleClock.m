@@ -355,7 +355,7 @@ try
     
     
     %% BEGIN TASK AFTER SYNC OBTAINED FROM SCANNER
-    [scannerStart, priorFlip] = scannerPulseSync;
+    [scannerStart, priorFlip] = waitForScannerTrigger;
     
     % Grab the time right after the scanner syncs
     checktime=GetSecs();
@@ -672,7 +672,8 @@ sca
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                           support functions
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+    
+    %Old sync code no not use
     function [seconds, VBLT] = scannerPulseSync
         while(1)
             [ keyIsDown, seconds, keyCode ] = KbCheck;
@@ -689,6 +690,53 @@ sca
         % and obtain time stamp of pulse for use with timings
         [VBLT, SOnsetTime] = Screen('Flip', w);
     end
+
+    %New scanner sync function
+    %See https://github.com/LabNeuroCogDevel/MRRC_utils/blob/master/task_presentation/waitForScannerTrigger.m
+    %for more info or ask Will Foran
+    function [trgrtime, VBLT] = waitForScannerTrigger()
+        % 20180103 WF - wait for trigger keypess
+        %  use PTB's KbQueue for new Psychology Software Tools button box
+        %  because simulated keypress is too fast to be consistently captured by ListenChar/KbWait/KbCheck
+        %  trigger is a simulated "=" keypress
+        
+        % what key(s) are acceptable scanner start triggers
+        triggerKeys = {'=+'};
+        
+        % setup: var, keys, and queue
+        scannerTrigger = 0;
+        triggerIdx = KbName(triggerKeys);
+        % ListenChar(2); % we can tell matlab to not show keypresses
+        KbQueueCreate(); KbQueueStart();
+        
+        % keep checking until the scanner says it started
+        while ~scannerTrigger
+            [pressed, firstPress, ~,~,~] = KbQueueCheck();
+            scannerTrigger = pressed && ...
+                any(ismember(triggerKeys, KbName(firstPress)));
+        end
+        
+        % grab the time of the button push. look at press of first (by key order) trigger key
+        [~,~, trgrtime ] = find(firstPress(triggerIdx),1)
+        
+        % release queue -- unblock listening to keyboard -- so we can use KbWait later
+        % this takes about .090 seconds
+        % which is why we grab time above
+        KbQueueStop(); KbQueueRelease()
+        
+        % change the screen to prevent key code carrying forward
+        % and obtain time stamp of pulse for use with timings
+        [VBLT, SOnsetTime] = Screen('Flip', w);
+        
+        % % previously trigger simulated "key press" was long enough to be captured by KbWait
+        % while ~ scannerTrigger
+        %   [~, keyCode, ~]  = KbWait;
+        %   scannerTrigger = any(ismember({'=','=+'}, KbName(keyCode)));
+        % end
+        
+    end
+
+
 
     function msgAndCloseEverything(message)
         DrawFormattedText(w, [message '\n\n push any key but esc to quit'],...

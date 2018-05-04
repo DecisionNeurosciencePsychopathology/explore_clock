@@ -1,9 +1,8 @@
-function [out,task_data]=makeClockRegressor(id,fpath,out,task_data)
+function [out]=makeClockRegressor(id,fpath,out)
 
-if nargin < 3, out = 0; end
-if nargin < 4, out = 0; task_data=struct([]); end
+try out; catch; out=0; end
 
-if ~isstr(id)
+if ~ischar(id)
     id = num2str(id);
 end
 
@@ -41,10 +40,6 @@ b.itionset = T.iti_onset;
 
 %Create volume-wise censor regressor
 b=createClockCensorRegressor(b);
-
-%Update task tracking data -- this should be true however the imaging
-%pipeline likes to break down without finishing sometimes!
-task_data.fMRI_processed=1;
 
 %Return vba_regressors data
 if isstruct(out)
